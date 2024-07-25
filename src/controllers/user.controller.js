@@ -142,7 +142,6 @@ const logout = asyncHandler(async function(req,res){
 
 })
 
-<<<<<<< HEAD
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
@@ -182,6 +181,3 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 export {registerUser, loginUser, logout, refreshAccessToken}
-=======
-export {registerUser, loginUser, logout}
->>>>>>> ab91996cf2e7bc5f1af97ecbaa7739f5e257d559
