@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from '../utils/ApiError.js'; 
 import { User} from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 
 
@@ -101,6 +102,8 @@ const loginUser = asyncHandler(async function(req, res){
 
     return res
     .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(
             200, 
@@ -114,4 +117,67 @@ const loginUser = asyncHandler(async function(req, res){
 
 })
 
-export {registerUser, loginUser}
+const logout = asyncHandler(async function(req,res){
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          $unset : {
+            refreshToken : 1
+          }  
+        },
+        {
+            new: true
+        }  
+    )
+
+    const options = {httpOnly : true, secure: true}
+
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken", options)
+    .json(
+        new ApiResponse(200,"","User Logged out succesfully")
+    )
+
+})
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    console.log("inc TOKEN", incomingRefreshToken);
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "Unauthorized request")
+    }
+    console.log("inc TOKEN", incomingRefreshToken);
+    const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+    // console.log("decodede Token-------", decodedToken);
+    
+    const user = await User.findById(decodedToken?._id)
+
+    if(!user){
+        throw new ApiError(401, "Invalid user Token")
+    }
+
+    if(incomingRefreshToken !== user?.refreshToken){
+        throw new ApiError(402, "Invalid user Token")
+    }
+
+    const {refreshToken, accessToken} = await generateRefreshAndAccessToken(user?._id)
+
+    console.log("Tokens---",refreshToken,accessToken);
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+       new ApiResponse(200, {accessToken, refreshToken}, "Refresh Token refreshed")
+    )
+})
+
+export {registerUser, loginUser, logout, refreshAccessToken}
