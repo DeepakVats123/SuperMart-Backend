@@ -222,4 +222,34 @@ const ordersHistory = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerUser,ordersHistory, loginUser, logout, refreshAccessToken,getProfile}
+const addToCart = asyncHandler(async (req, res) => {
+   const cartData = req.body
+
+   const user = await User.findById(req.user._id).select(
+    "-password -refreshToken"
+   )
+
+   if(!user){
+    throw new ApiError(401, "You are not authorized")
+   }
+
+   user.cartItems = [...user.cartItems,cartData]
+   user.save({validateBeforeSave: false})
+
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(200, user, "Item added to cart successfully")
+   )
+
+
+})
+
+export {
+    addToCart, 
+    registerUser,
+    ordersHistory,
+    loginUser,
+    logout,
+    refreshAccessToken,
+    getProfile}
