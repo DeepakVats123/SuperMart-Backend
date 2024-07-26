@@ -145,13 +145,14 @@ const logout = asyncHandler(async function(req,res){
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
-    console.log("inc TOKEN", incomingRefreshToken);
+    // console.log("inc TOKEN", incomingRefreshToken);
+
     if(!incomingRefreshToken){
         throw new ApiError(401, "Unauthorized request")
     }
-    console.log("inc TOKEN", incomingRefreshToken);
+    
     const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
-    // console.log("decodede Token-------", decodedToken);
+    
     
     const user = await User.findById(decodedToken?._id)
 
@@ -165,7 +166,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const {refreshToken, accessToken} = await generateRefreshAndAccessToken(user?._id)
 
-    console.log("Tokens---",refreshToken,accessToken);
+    
     const options = {
         httpOnly: true,
         secure: true
@@ -180,4 +181,45 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerUser, loginUser, logout, refreshAccessToken}
+const getProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    )
+
+    if(!user){
+        throw new ApiError(401, "Something went wrong while fetching user profile")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user,"User Profile fetched")
+    )
+})
+
+const ordersHistory = asyncHandler(async (req, res) => {
+    const order = req.body
+    const {items, order_total, address } = order
+
+    const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    )
+    if(!user){
+        throw new ApiError(401, "user not found")
+    }
+
+    if(typeof items !== typeof [] || items.length === 0 || typeof order_total !== "number" || typeof address !== "string"){
+        throw new ApiError(401, "Order data should be in format!! \n items = [],orderTotal = Number, address = String" )
+    }
+
+    user.ordersHistory = [...user.ordersHistory, order]
+    user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, user.ordersHistory ,"ordered successfully")
+    )
+})
+
+export {registerUser,ordersHistory, loginUser, logout, refreshAccessToken,getProfile}
