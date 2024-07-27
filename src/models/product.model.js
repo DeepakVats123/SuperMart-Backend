@@ -2,15 +2,15 @@ import mongoose, {Schema} from 'mongoose';
 
 const productSchema = new Schema(
     {
-        title: {
+        name: {
             type: String,
             require: true
         },
-        desc: {
+        brand: {
             type: String,
             require: true
         },
-        image: {
+        image_url: {
             type: String,
             require: true
         },
@@ -18,13 +18,31 @@ const productSchema = new Schema(
             type: Number,
             require: true
         },
-        category: {
+        strikedoffprice: {
             type: String,
             require: true
+        },
+        category: {
+            type: String,
+            require: true,
+            default: "men"
+        },
+        rating: {
+            type: Number,
+            require: true
+        },
+        popular: {
+            type: Number,
+            require: true
+        },
+        new: {
+            type: Number,
+            default: 0
+        },
+        quantity: {
+            type: Number,
+            require: true
         }
-    },
-    {
-        timestamps: true
     }
 )
 

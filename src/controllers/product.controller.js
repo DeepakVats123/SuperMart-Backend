@@ -2,18 +2,26 @@ import {Product} from "../models/product.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+// import { menData,womenData } from "../../data.js";
 
 const addProductsToDB = asyncHandler(async (req, res) => {
         const productData =  req.body
-        const {title,desc,image,price,category} = productData
-
+        const {name,image_url,price,category,rating,strikedoffprice,popular, quantity} = productData
+        
+        if(!productData ){
+            throw new ApiError(401, "data must be required in object formet")
+        }
         const product = await Product.create(
             {
-                title,
-                desc,
-                image,
+                name,
+                image_url,
+                brand,
                 price,
-                category 
+                category,
+                rating,
+                strikedoffprice,
+                popular,
+                quantity
             }
         )
 
@@ -30,15 +38,32 @@ const addProductsToDB = asyncHandler(async (req, res) => {
         )
 })
 
+const deleteAllProducts = asyncHandler(async (req, res) => {
+    const result = await Product.deleteMany({})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,result,"Delete all products successfully")
+    )
+}) 
+
 const addProductsList = asyncHandler(async (req, res) => {
     const productData =  req.body
 
-    if(!productData){
-        throw new ApiError(401, "Data is not coming from body")
+    if(productData.length === 0 || productData.length === undefined){
+        throw new ApiError(401, "Data is not coming or data should be an array")
     }
-   
 
+    // for insert many products in on go
     const updatedProductsList = await Product.insertMany(productData)
+
+    // const updateManyProducts = await Product.updateMany(
+    //     {},
+    //     {
+    //         $set: {category: "women"}
+    //     }
+    //    )
 
    const allProducts = await Product.find({})
     
@@ -63,9 +88,39 @@ const getAllProducts = asyncHandler(async (req, res) => {
     )
 })
 
+const getMenData = asyncHandler(async (req, res) => {
+    const menProducts = await Product.find({category: "men"})
+    console.log("Men--",menProducts.length)
+    if(!menProducts){
+        throw new ApiError("somthing went wrong while fething")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,menProducts,"Men's products fetched successfully !!")
+    )
+})
+
+const getWomenData = asyncHandler(async (req, res) => {
+    const womenProducts = await Product.find({category: "women"})
+    
+    if(!womenProducts){
+        throw new ApiError("somthing went wrong while fething")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,womenProducts,"Women's products fetched successfully !!")
+    )
+})
 
 export {
     addProductsToDB,
     addProductsList,
-    getAllProducts
+    getAllProducts,
+    deleteAllProducts,
+    getMenData,
+    getWomenData
 }
