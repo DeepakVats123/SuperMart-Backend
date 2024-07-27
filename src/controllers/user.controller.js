@@ -232,9 +232,24 @@ const addToCart = asyncHandler(async (req, res) => {
    if(!user){
     throw new ApiError(401, "You are not authorized")
    }
+   let cart_Items = user.cartItems
 
-   user.cartItems = [...user.cartItems,cartData]
-   user.save({validateBeforeSave: false})
+   const existingItem = cart_Items.find((item) => item._id === cartData._id)
+
+   if(existingItem){
+       const Items = cart_Items.map((e) => {
+           return e._id === cartData._id ? {...e, quantity: e.quantity + 1}: e
+       })
+       user.cartItems = Items
+       user.save({validateBeforeSave: false})
+    }
+   else{
+    user.cartItems = [...user.cartItems, cartData]
+    await user.save({validateBeforeSave: false})
+   }
+
+   
+  
 
    return res
    .status(200)
