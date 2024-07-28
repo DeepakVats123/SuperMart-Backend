@@ -254,14 +254,117 @@ const addToCart = asyncHandler(async (req, res) => {
    return res
    .status(200)
    .json(
-    new ApiResponse(200, user, "Item added to cart successfully")
+    new ApiResponse(200, user.cartItems, "Item added to cart successfully")
    )
 
 
 })
 
+const IncreseCartItem = asyncHandler(async (req, res)=>{
+    const item = req.body
+    if(typeof item !== "object"){
+        throw new ApiError(401, "data not found or not an Object")
+     }
+
+     const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+     )
+
+     if(!user){
+        throw new ApiError(401, "You are not authorized")
+     }
+
+    let cart_Items = user.cartItems
+    const Items = cart_Items.map((e) => {
+        return e._id === item._id ? {...e, quantity: e.quantity + 1}: e
+    })
+
+    user.cartItems = Items
+    const updatedItems = await user.save({validateBeforeSave: false})
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,updatedItems.cartItems,"Quantity increase successfully !!")
+    )
+
+})
+
+const DecreseCartItem = asyncHandler(async (req, res)=>{
+    const item = req.body
+    if(typeof item !== "object"){
+        throw new ApiError(401, "data not found or not an Object")
+     }
+
+
+     const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+     )
+
+     if(!user){
+        throw new ApiError(401, "You are not authorized")
+     }
+
+    if(item.quantity === 1){
+        return res
+        .status(201)
+        .json(
+            new ApiResponse(201, user.cartItems, "Cannot decrease item only 1 left")
+        )
+    }
+    else{
+        let cart_Items = user.cartItems
+    const Items = cart_Items.map((e) => {
+        return e._id === item._id ? {...e, quantity: e.quantity - 1}: e
+    })
+
+    user.cartItems = Items
+    const updatedItems = await user.save({validateBeforeSave: false})
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,updatedItems.cartItems,"Quantity increase successfully !!")
+    )
+
+    }
+    
+
+    
+})
+
+const deleteCartItems = asyncHandler(async (req, res) => {
+
+    const item = req.body
+    if(typeof item !== "object"){
+        throw new ApiError(401, "data not found or not an Object")
+     }
+
+    const user = await User.findById(req.user._id).select(
+        "-password -refreshToken"
+    )
+
+    if(!user){
+        throw new ApiError(401, "You are not authorized")
+    }
+
+    user.cartItems = user.cartItems.filter((e) => {
+       return e._id !== item._id
+    })
+    const updatedData = await user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201, updatedData.cartItems, "Item deleted successfully !!")
+    )
+})
+
 export {
-    addToCart, 
+    addToCart,
+    IncreseCartItem,
+    DecreseCartItem,
+    deleteCartItems, 
     registerUser,
     ordersHistory,
     loginUser,
