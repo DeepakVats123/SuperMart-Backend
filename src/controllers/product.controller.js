@@ -116,11 +116,37 @@ const getWomenData = asyncHandler(async (req, res) => {
     )
 })
 
+const searchProduct = asyncHandler(async (req, res) => {
+    const result = await Product.aggregate(
+        [
+            {
+              $search: {
+                index: "search-text",
+                text: {
+                  query: req.query.text,
+                  path: {
+                    wildcard: "*"
+                  }
+                }
+              }
+            }
+            
+        ]
+    )
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,result,"search successfully !!")
+    )
+})
+
 export {
     addProductsToDB,
     addProductsList,
     getAllProducts,
     deleteAllProducts,
     getMenData,
-    getWomenData
+    getWomenData,
+    searchProduct
 }

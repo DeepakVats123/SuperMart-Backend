@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { addProductsList, addProductsToDB, deleteAllProducts, getAllProducts, getMenData, getWomenData } from "../controllers/product.controller.js";
+import { addProductsList, addProductsToDB, deleteAllProducts, getAllProducts, getMenData, getWomenData, searchProduct } from "../controllers/product.controller.js";
 
 const router = Router();
 
@@ -10,5 +10,6 @@ router.route("/delete-products-list").post(verifyJWT, deleteAllProducts)
 router.route("/get-Products").get(getAllProducts)
 router.route("/men").get(getMenData)
 router.route("/women").get(getWomenData)
+router.route("/search").get(searchProduct)
 
 export default router
