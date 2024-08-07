@@ -88,6 +88,22 @@ const getAllProducts = asyncHandler(async (req, res) => {
     )
 })
 
+const getProductByID = asyncHandler(async (req, res) => {
+
+    console.log("/n iiiiiidddddddddddddddd",req.query.id)
+    const product = await Product.findById(req.query.id)
+
+    if(!product){
+        throw new ApiError(401, "something went wrong while fetching product")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(201,product,"Product fetched successfully!")
+    )
+})
+
 const getMenData = asyncHandler(async (req, res) => {
     const menProducts = await Product.find({category: "men"})
     console.log("Men--",menProducts.length)
@@ -145,6 +161,7 @@ export {
     addProductsToDB,
     addProductsList,
     getAllProducts,
+    getProductByID,
     deleteAllProducts,
     getMenData,
     getWomenData,
