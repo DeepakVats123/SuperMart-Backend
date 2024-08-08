@@ -90,7 +90,14 @@ const loginUser = asyncHandler(async function(req, res){
     
 
     if(!isPassCorrect){
-        throw new ApiError(403, "Incorrect user password !")
+        return res
+        .status(202)
+        .json(
+            new ApiResponse(
+                200, 
+                {},
+                "Your password is incorrect")
+        )
     }
 
     const {refreshToken, accessToken} = await generateRefreshAndAccessToken(user._id)
