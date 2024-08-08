@@ -90,13 +90,9 @@ const loginUser = asyncHandler(async function(req, res){
     
 
     if(!isPassCorrect){
-        return res
-        .status(202)
+         res.status(202)
         .json(
-            new ApiResponse(
-                202, 
-                {},
-                "Your password is incorrect")
+            new ApiResponse(202, {}, "Your password is incorrect")
         )
     }
 
