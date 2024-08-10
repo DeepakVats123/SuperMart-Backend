@@ -77,13 +77,13 @@ const loginUser = asyncHandler(async function(req, res){
     const {email, password} = req.body
 
     if([email, password].some((field) => field?.trim === "")){
-        throw new ApiError(401, "All fields are required.")
+        new ApiResponse(401,{}, "All fields are required.")
     }
     
     const user = await User.findOne({email})
     
     if(!user){
-        throw new ApiError(402, "User not found please register first.") 
+        new ApiResponse(401, {}, "User not found or invalid credentials.") 
     }
 
     const isPassCorrect = await user.isPasswordCorrect(password)
@@ -92,7 +92,7 @@ const loginUser = asyncHandler(async function(req, res){
     if(!isPassCorrect){
          res.status(202)
         .json(
-            new ApiResponse(202, {}, "Your password is incorrect")
+            new ApiResponse(401, {}, "Incorrect password or invalid credentials.")
         )
     }
 
