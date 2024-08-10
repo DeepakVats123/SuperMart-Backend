@@ -128,8 +128,9 @@ const loginUser = asyncHandler(async function(req, res){
 })
 
 const logout = asyncHandler(async function(req,res){
+    const {userID} = req.body || req.user._id
     const user = await User.findByIdAndUpdate(
-        req.user._id,
+        userID,
         {
           $unset : {
             refreshToken : 1
@@ -233,9 +234,10 @@ const ordersHistory = asyncHandler(async (req, res) => {
 })
 
 const addToCart = asyncHandler(async (req, res) => {
-   const cartData = req.body
+   const {cartData, userID} = req.body
+   const USER_ID = req.user._id || userID
 
-   const user = await User.findById(req.user._id).select(
+   const user = await User.findById(USER_ID).select(
     "-password -refreshToken"
    )
 
@@ -271,12 +273,14 @@ const addToCart = asyncHandler(async (req, res) => {
 })
 
 const IncreseCartItem = asyncHandler(async (req, res)=>{
-    const item = req.body
+    const {item, userID} = req.body
+   const USER_ID = req.user._id || userID
+
     if(typeof item !== "object"){
         throw new ApiError(401, "data not found or not an Object")
      }
 
-     const user = await User.findById(req.user._id).select(
+     const user = await User.findById(USER_ID).select(
         "-password -refreshToken"
      )
 
@@ -286,7 +290,7 @@ const IncreseCartItem = asyncHandler(async (req, res)=>{
 
     let cart_Items = user.cartItems
     const Items = cart_Items.map((e) => {
-        return e._id === item._id ? {...e, quantity: e.quantity + 1}: e
+        return e._id === item._id ? {...e, quantity: e.quantity + 1} : e
     })
 
     user.cartItems = Items
@@ -301,13 +305,16 @@ const IncreseCartItem = asyncHandler(async (req, res)=>{
 })
 
 const DecreseCartItem = asyncHandler(async (req, res)=>{
-    const item = req.body
+    const {item, userID} = req.body
+    console.log(req.body);
+    const USER_ID = req.user._id || userID
+
     if(typeof item !== "object"){
         throw new ApiError(401, "data not found or not an Object")
      }
 
 
-     const user = await User.findById(req.user._id).select(
+     const user = await User.findById(USER_ID).select(
         "-password -refreshToken"
      )
 
@@ -345,12 +352,14 @@ const DecreseCartItem = asyncHandler(async (req, res)=>{
 
 const deleteCartItems = asyncHandler(async (req, res) => {
 
-    const item = req.body
+    const {item, userID} = req.body
+    const USER_ID = req.user._id || userID
+
     if(typeof item !== "object"){
         throw new ApiError(401, "data not found or not an Object")
      }
 
-    const user = await User.findById(req.user._id).select(
+    const user = await User.findById(USER_ID).select(
         "-password -refreshToken"
     )
 
