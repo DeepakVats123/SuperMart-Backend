@@ -219,9 +219,27 @@ const ordersHistory = asyncHandler(async (req, res) => {
         throw new ApiError(401, "user not found")
     }
 
-    if(typeof items !== typeof [] || items.length === 0 || typeof order_total !== "number" || typeof address !== "string"){
+    if(items.length === 0 || typeof order_total !== "number" || typeof address !== "object"){
         throw new ApiError(401, "Order data should be in format!! \n items = [],orderTotal = Number, address = String" )
     }
+
+    const timestamp = Date.now();
+    const now = new Date();
+
+    const date = new Date(timestamp);
+
+    const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with leading zero if necessary
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (0-based, so add 1) and pad
+    const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
+    const hours = now.getHours(); // 0-23
+    const minutes = now.getMinutes(); // 0-59
+    const seconds = now.getSeconds(); // 0-59
+
+    // Format the time as hh:mm:ss 
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const formattedDate = `${day}/${month}/${year}`;
+    order.date = formattedDate
+    order.time = formattedTime
 
     user.ordersHistory = [...user.ordersHistory, order]
     user.save({validateBeforeSave: false})
