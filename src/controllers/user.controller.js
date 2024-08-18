@@ -397,11 +397,33 @@ const deleteCartItems = asyncHandler(async (req, res) => {
     )
 })
 
+const deleteAllCartItems = asyncHandler(async (req, res) => {
+    const USER_ID = req.user._id 
+
+    const user = await User.findById(USER_ID).select(
+        "-password -refreshToken"
+    )
+
+    if(!user){
+        throw new ApiError(401, "You are not authorized")
+    }
+
+    user.cartItems = []
+    const updatedData = await user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, updatedData.cartItems, "Items deleted successfully !!")
+    )
+})
+
 export {
     addToCart,
     IncreseCartItem,
     DecreseCartItem,
-    deleteCartItems, 
+    deleteCartItems,
+    deleteAllCartItems, 
     registerUser,
     ordersHistory,
     loginUser,

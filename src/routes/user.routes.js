@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { getProfile, loginUser, logout, refreshAccessToken, registerUser, ordersHistory, addToCart, IncreseCartItem, DecreseCartItem, deleteCartItems } from "../controllers/user.controller.js"
+import { getProfile, loginUser, logout, refreshAccessToken, registerUser, ordersHistory, addToCart, IncreseCartItem, DecreseCartItem, deleteCartItems, deleteAllCartItems } from "../controllers/user.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 
 const router = Router()
@@ -16,6 +16,7 @@ router.route("/add-to-cart").post(verifyJWT, addToCart)
 router.route("/cart/inc").post(verifyJWT, IncreseCartItem)
 router.route("/cart/dec").post(verifyJWT, DecreseCartItem)
 router.route("/cart/delete").post(verifyJWT, deleteCartItems)
+router.route("/cart/delete-all").post(verifyJWT, deleteAllCartItems)
 
 
 export default router
