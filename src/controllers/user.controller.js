@@ -223,23 +223,24 @@ const ordersHistory = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Order data should be in format!! \n items = [],orderTotal = Number, address = String" )
     }
 
-    const timestamp = Date.now();
-    const now = new Date();
+    const date = new Date();
 
-    const date = new Date(timestamp);
+    const timeOptions = {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true // 12-hour format with AM/PM
+    };
 
-    const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with leading zero if necessary
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (0-based, so add 1) and pad
-    const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
-    const hours = now.getHours(); // 0-23
-    const minutes = now.getMinutes(); // 0-59
-    const seconds = now.getSeconds(); // 0-59
+    const indiaTime = date.toLocaleTimeString('en-US', timeOptions);
 
-    // Format the time as hh:mm:ss 
-    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    const formattedDate = `${day}/${month}/${year}`;
+    const options = { day: '2-digit', month: 'short', year: '2-digit' };
+    const formattedDate = new Date().toLocaleDateString('en-GB', options).replace(/ /g, '/');
+
+    
     order.date = formattedDate
-    order.time = formattedTime
+    order.time = indiaTime
 
     user.ordersHistory = [...user.ordersHistory, order]
     user.save({validateBeforeSave: false})
